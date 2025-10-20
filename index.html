@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <title>Weather App by Immaculate Azuogu</title>
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background: linear-gradient(to top, #d0f0ff, #ffffff);
+        margin: 0;
+        padding: 20px;
+      }
+
+      .weather-app {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #ffffffcc;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .search-form-input {
+        width: 70%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+      }
+
+      .search-form-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .search-form-button:hover {
+        background-color: #0056b3;
+      }
+
+      .weather-app-data {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .weather-app-city {
+        font-size: 32px;
+        color: #004466;
+        margin: 0;
+      }
+
+      .weather-app-details {
+        color: #555;
+        font-size: 16px;
+      }
+
+      .weather-app-temperature-container {
+        display: flex;
+        align-items: center;
+      }
+
+      #icon img {
+        width: 80px;
+        height: 80px;
+      }
+
+      .weather-app-temperature {
+        font-size: 48px;
+        font-weight: bold;
+        color: #006699;
+        margin-right: 5px;
+      }
+
+      .weather-app-unit {
+        font-size: 22px;
+        color: #006699;
+      }
+
+      footer {
+        text-align: center;
+        font-size: 14px;
+        margin-top: 30px;
+        color: #333;
+      }
+
+      footer a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="weather-app">
+      <header>
+        <form class="search-form" id="search-form">
+          <input
+            type="search"
+            placeholder="Enter a city..."
+            required
+            id="search-form-input"
+            class="search-form-input"
+          />
+          <input type="submit" value="Search" class="search-form-button" />
+        </form>
+      </header>
+
+      <main>
+        <div class="weather-app-data">
+          <div>
+            <h1 class="weather-app-city" id="city">Loading...</h1>
+            <p class="weather-app-details">
+              <span id="time"></span>,
+              <span id="description"></span>
+              <br />
+              Humidity: <strong id="humidity"></strong>%, Wind:
+              <strong id="wind-speed"></strong> km/h
+            </p>
+          </div>
+
+          <div class="weather-app-temperature-container">
+            <div id="icon"></div>
+            <div class="weather-app-temperature" id="temperature">--</div>
+            <div class="weather-app-unit">°C</div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        This project was coded by
+        <a href="https://github.com/Favor-dev/NewWweather-App" target="_blank">
+          Immaculate Azuogu</a
+        >, is
+        <a
+          href="https://github.com/Favor-dev/NewWweather-App"
+          target="_blank"
+          >open-sourced on GitHub</a
+        >
+        and
+        <a
+          href="https://extraordinary-gelato-df64ae.netlify.app/"
+          target="_blank"
+          >hosted on Netlify</a
+        >.
+      </footer>
+    </div>
+
+    <script>
+      const apiKey = "559c028ba95b5d267bf7ba088c6cb5d6";
+
+      function formatDate(date) {
+        let days = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
+        let day = days[date.getDay()];
+        let hours = date.getHours().toString().padStart(2, "0");
+        let minutes = date.getMinutes().toString().padStart(2, "0");
+        return `${day}, ${hours}:${minutes}`;
+      }
+
+      function displayWeather(response) {
+        let cityElement = document.querySelector("#city");
+        let temperatureElement = document.querySelector("#temperature");
+        let descriptionElement = document.querySelector("#description");
+        let humidityElement = document.querySelector("#humidity");
+        let windElement = document.querySelector("#wind-speed");
+        let timeElement = document.querySelector("#time");
+        let iconElement = document.querySelector("#icon");
+
+        cityElement.innerHTML = response.data.name;
+        temperatureElement.innerHTML = Math.round(response.data.main.temp);
+        descriptionElement.innerHTML = response.data.weather[0].description;
+        humidityElement.innerHTML = response.data.main.humidity;
+        windElement.innerHTML = Math.round(response.data.wind.speed);
+        timeElement.innerHTML = formatDate(new Date());
+        iconElement.innerHTML = `<img src="http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png" alt="weather icon"/>`;
+      }
+
+      function searchCity(city) {
+        let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+        axios.get(apiUrl).then(displayWeather).catch(() => {
+          alert("City not found. Please try again.");
+        });
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        let cityInput = document.querySelector("#search-form-input");
+        searchCity(cityInput.value.trim());
+      }
+
+      // Default city
+      searchCity("London");
+
+      let form = document.querySelector("#search-form");
+      form.addEventListener("submit", handleSubmit);
+    </script>
+  </body>
+</html>
